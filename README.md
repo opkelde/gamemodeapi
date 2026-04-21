@@ -1,6 +1,6 @@
 # 🎮 GameModeAPI
 
-A standalone Windows service that detects running games on your PC and publishes game status to [Home Assistant](https://www.home-assistant.io) via MQTT — designed to complement [HASS.Agent](https://github.com/hass-agent/HASS.Agent).
+A standalone Windows service that detects running games on your PC and publishes game status to [Home Assistant](https://www.home-assistant.io) via MQTT.
 
 ## What It Does
 
@@ -25,22 +25,22 @@ GameModeAPI uses multiple detection methods for reliable game identification:
 3. **Fullscreen Detection** — Uses Windows APIs to detect D3D fullscreen applications
 4. **Custom Game List** — User-defined games for standalone/non-launcher titles
 
-## Integration with HASS.Agent
+## Integration with Home Assistant
 
-GameModeAPI publishes to the **same MQTT broker** that HASS.Agent uses. It appears as a separate device in the Home Assistant MQTT integration, alongside your existing HASS.Agent device. No modifications to HASS.Agent are required.
+GameModeAPI publishes its state to your Home Assistant instance using MQTT discovery. It appears as a standalone device in the Home Assistant MQTT integration automatically.
 
 ## Requirements
 
 - Windows 10/11
 - .NET 8 Runtime
-- MQTT Broker (e.g., Mosquitto) — the same one used by HASS.Agent
+- MQTT Broker (e.g., Mosquitto)
 - Home Assistant with MQTT integration configured
 
 ## Quick Start
 
 1. Download the latest release
 2. Edit `appsettings.json` with your MQTT broker details
-3. Run `GameModeAPI.exe`
+3. Run `GameModeAPI.exe` (or install as a Windows Service)
 4. Game Mode entities will automatically appear in Home Assistant
 
 ## Configuration
@@ -50,11 +50,20 @@ See `appsettings.json` for all configuration options including:
 - Polling interval
 - Debounce timing
 - Fullscreen detection toggle
-- Custom game definitions
+- Custom game definitions (via `data/custom_games.json`)
+
+## Windows Service Installation
+
+You can install GameModeAPI as a background Windows Service:
+
+```powershell
+sc.exe create "GameModeAPI" binPath= "C:\path\to\GameModeAPI.exe" start= auto
+sc.exe start "GameModeAPI"
+```
 
 ## License
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+This project is licensed under the GPL-3.0 License — see the [LICENSE](LICENSE) file for details.
 
 ## Contributing
 
@@ -65,3 +74,4 @@ Contributions are welcome! Please open an issue first to discuss what you would 
 - [HASS.Agent](https://github.com/hass-agent/HASS.Agent) — The Windows companion app for Home Assistant that inspired this project
 - [MQTTnet](https://github.com/dotnet/MQTTnet) — The MQTT library used for broker communication
 - [Home Assistant](https://www.home-assistant.io) — The open-source home automation platform
+- [GameFinder](https://github.com/erri120/GameFinder) — Game installation detection library

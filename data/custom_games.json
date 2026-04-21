@@ -1,0 +1,15 @@
+{
+  "games": [
+    {
+      "name": "RetroArch",
+      "executable": "retroarch.exe",
+      "launcher": "Standalone"
+    },
+    {
+      "name": "Minecraft Java",
+      "executable": "javaw.exe",
+      "match_window_title": "Minecraft",
+      "launcher": "Minecraft Launcher"
+    }
+  ]
+}

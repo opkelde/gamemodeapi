@@ -1,0 +1,66 @@
+<ui:FluentWindow x:Class="GameModeAPI.UI.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        Title="GameModeAPI Configuration" Height="500" Width="700"
+        WindowStartupLocation="CenterScreen"
+        WindowBackdropType="Mica">
+    <Grid>
+        <TabControl>
+            <!-- General Settings Tab -->
+            <TabItem Header="General Settings">
+                <StackPanel Margin="20" MaxWidth="400" HorizontalAlignment="Left">
+                    <TextBlock Text="MQTT Broker Configuration" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                    <ui:TextBox x:Name="TxtMqttHost" PlaceholderText="Host (e.g. 192.168.1.5)" Margin="0,5"/>
+                    <ui:TextBox x:Name="TxtMqttPort" PlaceholderText="Port (e.g. 1883)" Margin="0,5"/>
+                    <ui:TextBox x:Name="TxtMqttUser" PlaceholderText="Username" Margin="0,5"/>
+                    <ui:PasswordBox x:Name="TxtMqttPass" PlaceholderText="Password" Margin="0,5"/>
+                    
+                    <TextBlock Text="Device" FontSize="18" FontWeight="SemiBold" Margin="0,20,0,10"/>
+                    <ui:TextBox x:Name="TxtDeviceName" PlaceholderText="Device Name (e.g. Gaming PC)" Margin="0,5"/>
+                    <ui:ToggleSwitch x:Name="ChkAutostart" Content="Run on Windows Startup" Margin="0,10,0,0"/>
+                    
+                    <ui:Button Content="Save &amp; Apply" Click="BtnSave_Click" Margin="0,20,0,0" Appearance="Primary" />
+                </StackPanel>
+            </TabItem>
+            
+            <!-- Custom Games Tab -->
+            <TabItem Header="Custom Games">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    
+                    <TextBlock Grid.Row="0" Text="Manually tracked game executables:" Margin="0,0,0,10"/>
+                    
+                    <DataGrid Grid.Row="1" x:Name="DgCustomGames" AutoGenerateColumns="False" CanUserAddRows="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Game Name" Binding="{Binding Name}" Width="*"/>
+                            <DataGridTextColumn Header="Executable (e.g. game.exe)" Binding="{Binding Executable}" Width="*"/>
+                            <DataGridTextColumn Header="Window Title (Optional)" Binding="{Binding MatchWindowTitle}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    
+                    <ui:Button Grid.Row="2" Content="Save Custom Games" Click="BtnSaveGames_Click" Margin="0,10,0,0" Appearance="Primary" HorizontalAlignment="Right"/>
+                </Grid>
+            </TabItem>
+
+            <!-- Maintenance Tab -->
+            <TabItem Header="Maintenance">
+                <StackPanel Margin="20" MaxWidth="400" HorizontalAlignment="Left">
+                    <TextBlock Text="Configuration Backup" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                    <ui:Button Content="Backup Settings to Zip" Click="BtnBackup_Click" Margin="0,10,0,0" Icon="{ui:SymbolIcon ArrowDownload24}" Width="250"/>
+                    <ui:Button Content="Restore Settings from Zip" Click="BtnRestore_Click" Margin="0,10,0,0" Icon="{ui:SymbolIcon ArrowUpload24}" Width="250"/>
+                    
+                    <TextBlock Text="Appearance" FontSize="18" FontWeight="SemiBold" Margin="0,30,0,10"/>
+                    <StackPanel Orientation="Horizontal">
+                        <ui:Button Content="Light Mode" Click="BtnLightMode_Click" Margin="0,0,10,0" Icon="{ui:SymbolIcon WeatherSunny24}"/>
+                        <ui:Button Content="Dark Mode" Click="BtnDarkMode_Click" Margin="0,0,10,0" Icon="{ui:SymbolIcon WeatherMoon24}"/>
+                    </StackPanel>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</ui:FluentWindow>

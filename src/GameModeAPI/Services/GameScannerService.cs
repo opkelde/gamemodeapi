@@ -48,6 +48,11 @@ public class GameScannerService : BackgroundService
         try
         {
             await _mqttPublisher.ConnectAsync();
+            
+            // Force publish the initial state so Home Assistant doesn't show "Unknown"
+            _logger.LogInformation("Publishing initial Idle state to MQTT.");
+            await _mqttPublisher.PublishGameModeAsync(false);
+            await _mqttPublisher.PublishActiveGameAsync(GameState.Idle);
         }
         catch (Exception ex)
         {

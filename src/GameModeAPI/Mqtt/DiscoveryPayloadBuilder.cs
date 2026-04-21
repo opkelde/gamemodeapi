@@ -31,7 +31,7 @@ public class DiscoveryPayloadBuilder
     {
         var payload = new
         {
-            name = "Game Mode",
+            name = "Game Status",
             unique_id = $"gamemodeapi_{_deviceId}_game_mode",
             state_topic = MqttTopics.GameModeState(_deviceId),
             availability_topic = MqttTopics.Availability(_deviceId),

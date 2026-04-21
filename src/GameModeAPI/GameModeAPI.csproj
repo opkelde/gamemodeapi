@@ -1,7 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk.Worker">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>dotnet-GameModeAPI-63e3039b-1054-4f56-a128-3a0a468f9faa</UserSecretsId>
@@ -28,6 +31,7 @@
     <PackageReference Include="Serilog.Settings.Configuration" Version="8.*" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.*" />
     <PackageReference Include="Serilog.Sinks.File" Version="6.*" />
+    <PackageReference Include="WPF-UI" Version="4.2.0" />
   </ItemGroup>
 
   <ItemGroup>

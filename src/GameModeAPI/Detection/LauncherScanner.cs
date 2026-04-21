@@ -1,3 +1,4 @@
+using System.IO;
 using GameFinder.Common;
 using GameFinder.RegistryUtils;
 using GameFinder.StoreHandlers.EADesktop;

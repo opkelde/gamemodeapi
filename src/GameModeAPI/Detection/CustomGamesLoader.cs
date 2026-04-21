@@ -1,3 +1,4 @@
+using System.IO;
 using System.Text.Json;
 using GameModeAPI.Detection.Models;
 using Microsoft.Extensions.Logging;

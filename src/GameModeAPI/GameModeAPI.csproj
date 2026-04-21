@@ -12,6 +12,14 @@
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
   </PropertyGroup>
 
+  <Target Name="KillProcessBeforeBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="taskkill /F /IM GameModeAPI.exe /T 2&gt;nul || exit 0" />
+  </Target>
+
+  <ItemGroup>
+    <Resource Include="icon.png" />
+  </ItemGroup>
+
   <ItemGroup>
     <!-- MQTT -->
     <PackageReference Include="MQTTnet" Version="4.*" />

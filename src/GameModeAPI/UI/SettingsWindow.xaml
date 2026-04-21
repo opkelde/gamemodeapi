@@ -2,11 +2,30 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-        Title="GameModeAPI Configuration" Height="500" Width="700"
+        Title="GameModeAPI Settings" 
+        Height="500" Width="700"
         WindowStartupLocation="CenterScreen"
-        WindowBackdropType="Mica">
+        ExtendsContentIntoTitleBar="True"
+        Icon="pack://application:,,,/icon.png"
+        WindowCornerPreference="Round"
+        WindowBackdropType="Acrylic">
+    <ui:FluentWindow.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ui:ThemesDictionary Theme="Dark" />
+                <ui:ControlsDictionary />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </ui:FluentWindow.Resources>
     <Grid>
-        <TabControl>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <ui:TitleBar Grid.Row="0" Title="GameModeAPI Settings" />
+        
+        <TabControl Grid.Row="1">
             <!-- General Settings Tab -->
             <TabItem Header="General Settings">
                 <StackPanel Margin="20" MaxWidth="400" HorizontalAlignment="Left">

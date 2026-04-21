@@ -13,9 +13,28 @@ public class TrayIconManager : IDisposable
 
     public TrayIconManager()
     {
+        System.Drawing.Icon appIcon;
+        try
+        {
+            var streamInfo = Application.GetResourceStream(new Uri("pack://application:,,,/icon.png"));
+            if (streamInfo?.Stream != null)
+            {
+                using var bmp = new System.Drawing.Bitmap(streamInfo.Stream);
+                appIcon = System.Drawing.Icon.FromHandle(bmp.GetHicon());
+            }
+            else
+            {
+                appIcon = System.Drawing.SystemIcons.Application;
+            }
+        }
+        catch
+        {
+            appIcon = System.Drawing.SystemIcons.Application;
+        }
+
         _notifyIcon = new NotifyIcon
         {
-            Icon = System.Drawing.SystemIcons.Application,
+            Icon = appIcon,
             Visible = true,
             Text = "GameModeAPI"
         };
@@ -61,10 +80,21 @@ public class TrayIconManager : IDisposable
 
     private void Uninstall()
     {
-        var result = MessageBox.Show("Are you sure you want to uninstall? This will remove the autostart registry key and exit the application.", "Uninstall GameModeAPI", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+        var result = MessageBox.Show("Are you sure you want to uninstall? This will remove the autostart registry key, delete all settings, and exit the application.", "Uninstall GameModeAPI", MessageBoxButton.YesNo, MessageBoxImage.Warning);
         if (result == MessageBoxResult.Yes)
         {
             Configuration.AutostartManager.DisableAutostart();
+            
+            var appDataDir = System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "GameModeAPI");
+            if (System.IO.Directory.Exists(appDataDir))
+            {
+                try
+                {
+                    System.IO.Directory.Delete(appDataDir, true);
+                }
+                catch { /* Ignore errors if file is locked */ }
+            }
+
             Application.Current?.Shutdown();
         }
     }

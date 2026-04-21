@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 using Microsoft.Extensions.Configuration;
+using System.IO;
 
 namespace GameModeAPI;
 
@@ -13,6 +14,10 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = Host.CreateApplicationBuilder(args);
+
+        var appDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "GameModeAPI");
+        if (!Directory.Exists(appDataFolder)) Directory.CreateDirectory(appDataFolder);
+        builder.Configuration.AddJsonFile(Path.Combine(appDataFolder, "config.json"), optional: true, reloadOnChange: true);
 
         // Windows Service support
         builder.Services.AddWindowsService(options =>
@@ -53,15 +58,27 @@ public class Program
         
         GameModeAPI.UI.TrayIconManager? trayIcon = null;
         
+        app.DispatcherUnhandledException += (s, e) =>
+        {
+            File.WriteAllText("wpf_crash.log", e.Exception.ToString());
+            e.Handled = true;
+        };
+
         app.Startup += (s, e) => 
         {
-            trayIcon = new GameModeAPI.UI.TrayIconManager();
-            
-            // Check if MqttHost is default
-            var mqttHost = builder.Configuration.GetSection("Mqtt")["Host"];
-            if (string.IsNullOrEmpty(mqttHost) || mqttHost == "homeassistant.local")
+            try
             {
-                new GameModeAPI.UI.SettingsWindow().Show();
+                trayIcon = new GameModeAPI.UI.TrayIconManager();
+                
+                var mqttHost = builder.Configuration.GetSection("Mqtt")["Host"];
+                if (string.IsNullOrEmpty(mqttHost) || mqttHost == "homeassistant.local")
+                {
+                    new GameModeAPI.UI.SettingsWindow().Show();
+                }
+            }
+            catch (Exception ex)
+            {
+                File.WriteAllText("wpf_startup_crash.log", ex.ToString());
             }
         };
 

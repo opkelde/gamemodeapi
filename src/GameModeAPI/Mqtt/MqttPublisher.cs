@@ -11,20 +11,37 @@ namespace GameModeAPI.Mqtt;
 
 public class MqttPublisher : IMqttPublisher
 {
-    private readonly MqttSettings _mqttSettings;
-    private readonly ServiceSettings _serviceSettings;
+    private MqttSettings _mqttSettings;
+    private ServiceSettings _serviceSettings;
     private readonly ILogger<MqttPublisher> _logger;
     private IManagedMqttClient? _client;
     private readonly string _deviceId;
-    private readonly DiscoveryPayloadBuilder _discoveryBuilder;
+    private DiscoveryPayloadBuilder _discoveryBuilder;
 
     public MqttPublisher(
-        IOptions<MqttSettings> mqttOptions,
-        IOptions<ServiceSettings> serviceOptions,
+        IOptionsMonitor<MqttSettings> mqttOptionsMonitor,
+        IOptionsMonitor<ServiceSettings> serviceOptionsMonitor,
         ILogger<MqttPublisher> logger)
     {
-        _mqttSettings = mqttOptions.Value;
-        _serviceSettings = serviceOptions.Value;
+        _mqttSettings = mqttOptionsMonitor.CurrentValue;
+        mqttOptionsMonitor.OnChange(settings =>
+        {
+            logger.LogInformation("MQTT settings changed. Reconnecting...");
+            _mqttSettings = settings;
+            _ = ReconnectAsync();
+        });
+        
+        _serviceSettings = serviceOptionsMonitor.CurrentValue;
+        serviceOptionsMonitor.OnChange(settings =>
+        {
+            logger.LogInformation("Service settings changed. Updating device name...");
+            _serviceSettings = settings;
+            _discoveryBuilder = new DiscoveryPayloadBuilder(_serviceSettings);
+            if (_client != null && _client.IsStarted)
+            {
+                _ = PublishDiscoveryAsync();
+            }
+        });
         _logger = logger;
         _deviceId = _serviceSettings.GetOrGenerateDeviceId();
         _discoveryBuilder = new DiscoveryPayloadBuilder(_serviceSettings);
@@ -34,30 +51,6 @@ public class MqttPublisher : IMqttPublisher
     {
         var factory = new MqttFactory();
         _client = factory.CreateManagedMqttClient();
-
-        var clientOptionsBuilder = new MqttClientOptionsBuilder()
-            .WithTcpServer(_mqttSettings.Host, _mqttSettings.Port)
-            .WithClientId(_mqttSettings.ClientId)
-            .WithWillTopic(MqttTopics.Availability(_deviceId))
-            .WithWillPayload("offline")
-            .WithWillRetain(true);
-
-        if (!string.IsNullOrWhiteSpace(_mqttSettings.Username))
-        {
-            clientOptionsBuilder.WithCredentials(_mqttSettings.Username, _mqttSettings.Password);
-        }
-
-        if (_mqttSettings.UseTls)
-        {
-            clientOptionsBuilder.WithTlsOptions(o => o.UseTls());
-        }
-
-        var clientOptions = clientOptionsBuilder.Build();
-
-        var managedOptions = new ManagedMqttClientOptionsBuilder()
-            .WithAutoReconnectDelay(TimeSpan.FromSeconds(5))
-            .WithClientOptions(clientOptions)
-            .Build();
 
         _client.ConnectedAsync += async e =>
         {
@@ -79,6 +72,39 @@ public class MqttPublisher : IMqttPublisher
         };
 
         _logger.LogInformation("Starting MQTT client...");
+        await ReconnectAsync();
+    }
+
+    private async Task ReconnectAsync()
+    {
+        if (_client == null) return;
+        if (_client.IsStarted)
+        {
+            await _client.StopAsync();
+        }
+
+        var clientOptionsBuilder = new MqttClientOptionsBuilder()
+            .WithTcpServer(_mqttSettings.Host, _mqttSettings.Port)
+            .WithClientId(_mqttSettings.ClientId)
+            .WithWillTopic(MqttTopics.Availability(_deviceId))
+            .WithWillPayload("offline")
+            .WithWillRetain(true);
+
+        if (!string.IsNullOrWhiteSpace(_mqttSettings.Username))
+        {
+            clientOptionsBuilder.WithCredentials(_mqttSettings.Username, _mqttSettings.Password);
+        }
+
+        if (_mqttSettings.UseTls)
+        {
+            clientOptionsBuilder.WithTlsOptions(o => o.UseTls());
+        }
+
+        var managedOptions = new ManagedMqttClientOptionsBuilder()
+            .WithAutoReconnectDelay(TimeSpan.FromSeconds(5))
+            .WithClientOptions(clientOptionsBuilder.Build())
+            .Build();
+
         await _client.StartAsync(managedOptions);
     }
 

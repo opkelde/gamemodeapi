@@ -6,6 +6,6 @@ public class DetectionSettings
     public int DebounceSeconds { get; set; } = 10;
     public bool EnableFullscreenDetection { get; set; } = true;
     public bool EnableLauncherScanning { get; set; } = true;
-    public string CustomGamesPath { get; set; } = "data/custom_games.json";
+    public string CustomGamesPath { get; set; } = System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "GameModeAPI", "custom_games.json");
     public int LauncherRescanIntervalMinutes { get; set; } = 60;
 }

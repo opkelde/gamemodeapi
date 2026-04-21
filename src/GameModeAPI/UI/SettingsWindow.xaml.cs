@@ -13,9 +13,9 @@ namespace GameModeAPI.UI;
 
 public partial class SettingsWindow : Wpf.Ui.Controls.FluentWindow
 {
-    private const string AppSettingsPath = "appsettings.Development.json";
-    private const string BaseSettingsPath = "appsettings.json";
-    private const string CustomGamesPath = "data/custom_games.json";
+    private static readonly string AppDataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "GameModeAPI");
+    private static readonly string AppSettingsPath = Path.Combine(AppDataDir, "config.json");
+    private static readonly string CustomGamesPath = Path.Combine(AppDataDir, "custom_games.json");
 
     public ObservableCollection<CustomGameEntry> CustomGames { get; set; } = new();
 
@@ -33,12 +33,11 @@ public partial class SettingsWindow : Wpf.Ui.Controls.FluentWindow
 
     private void LoadSettings()
     {
-        var path = File.Exists(AppSettingsPath) ? AppSettingsPath : BaseSettingsPath;
-        if (!File.Exists(path)) return;
+        if (!File.Exists(AppSettingsPath)) return;
 
         try
         {
-            var json = File.ReadAllText(path);
+            var json = File.ReadAllText(AppSettingsPath);
             var node = JsonNode.Parse(json);
 
             if (node != null && node["Mqtt"] != null)
@@ -82,11 +81,23 @@ public partial class SettingsWindow : Wpf.Ui.Controls.FluentWindow
     {
         try
         {
-            var path = File.Exists(AppSettingsPath) ? AppSettingsPath : BaseSettingsPath;
-            JsonNode node = File.Exists(path) ? JsonNode.Parse(File.ReadAllText(path))! : new JsonObject();
+            if (!Directory.Exists(AppDataDir)) Directory.CreateDirectory(AppDataDir);
+            JsonNode node = File.Exists(AppSettingsPath) ? JsonNode.Parse(File.ReadAllText(AppSettingsPath))! : new JsonObject();
 
             if (node["Mqtt"] == null) node["Mqtt"] = new JsonObject();
-            node["Mqtt"]!["Host"] = TxtMqttHost.Text;
+            
+            var rawHost = TxtMqttHost.Text?.Trim() ?? "";
+            if (Uri.TryCreate(rawHost, UriKind.Absolute, out var uri) && 
+                (rawHost.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || rawHost.StartsWith("https://", StringComparison.OrdinalIgnoreCase)))
+            {
+                rawHost = uri.Host;
+            }
+            else
+            {
+                rawHost = rawHost.TrimEnd('/');
+            }
+            
+            node["Mqtt"]!["Host"] = rawHost;
             node["Mqtt"]!["Port"] = int.TryParse(TxtMqttPort.Text, out var port) ? port : 1883;
             node["Mqtt"]!["Username"] = TxtMqttUser.Text;
             node["Mqtt"]!["Password"] = TxtMqttPass.Password;
@@ -99,7 +110,7 @@ public partial class SettingsWindow : Wpf.Ui.Controls.FluentWindow
             if (ChkAutostart.IsChecked == true) AutostartManager.EnableAutostart();
             else AutostartManager.DisableAutostart();
 
-            MessageBox.Show("Settings saved successfully! Please restart the service to apply changes.", "Saved", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show("Settings saved successfully! Changes have been applied instantly.", "Saved", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
@@ -158,6 +169,15 @@ public partial class SettingsWindow : Wpf.Ui.Controls.FluentWindow
         }
     }
 
-    private void BtnLightMode_Click(object sender, RoutedEventArgs e) => ApplicationThemeManager.Apply(ApplicationTheme.Light);
-    private void BtnDarkMode_Click(object sender, RoutedEventArgs e) => ApplicationThemeManager.Apply(ApplicationTheme.Dark);
+    private void BtnLightMode_Click(object sender, RoutedEventArgs e)
+    {
+        ApplicationThemeManager.Apply(ApplicationTheme.Light, Wpf.Ui.Controls.WindowBackdropType.Acrylic);
+        ApplicationThemeManager.Apply(this);
+    }
+
+    private void BtnDarkMode_Click(object sender, RoutedEventArgs e)
+    {
+        ApplicationThemeManager.Apply(ApplicationTheme.Dark, Wpf.Ui.Controls.WindowBackdropType.Acrylic);
+        ApplicationThemeManager.Apply(this);
+    }
 }

@@ -1,6 +1,6 @@
-# Contributing to GameModeAPI
+# Contributing to GameDetect
 
-Thank you for your interest in contributing to GameModeAPI!
+Thank you for your interest in contributing to GameDetect!
 
 ## How to Contribute
 
@@ -29,7 +29,7 @@ dotnet test
 
 ### Running Locally
 ```bash
-dotnet run --project src/GameModeAPI
+dotnet run --project src/GameDetect
 ```
 
 ## Reporting Bugs
@@ -44,3 +44,4 @@ Please open a GitHub issue with:
 ## License
 
 By contributing, you agree that your contributions will be licensed under the GPL-3.0 License.
+

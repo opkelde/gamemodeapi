@@ -63,3 +63,6 @@ $RECYCLE.BIN/
 # User-specific config overrides (may contain passwords)
 appsettings.Development.json
 appsettings.Local.json
+
+# Scratch
+scratch/

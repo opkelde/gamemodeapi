@@ -66,3 +66,7 @@ appsettings.Local.json
 
 # Scratch
 scratch/
+
+# Build and Installer Output
+publish/
+Output/
